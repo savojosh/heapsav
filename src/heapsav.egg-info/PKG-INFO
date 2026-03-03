@@ -1,5 +1,5 @@
 Metadata-Version: 2.4
-Name: heapsav_savojosh
+Name: heapsav
 Version: 0.0.1
 Summary: Heap class that can be maintained as a min- or max- heap.
 Author-email: savojosh <jmps2022@gmail.com>

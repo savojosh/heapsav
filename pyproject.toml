@@ -1,5 +1,5 @@
 [project]
-name = "heapsav_savojosh"
+name = "heapsav"
 version = "0.0.1"
 authors = [
   { name="savojosh", email="jmps2022@gmail.com" },
