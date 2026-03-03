@@ -1,5 +1,41 @@
 from enum import Enum
 
+def generateHeapSize(n: int, l: int=0) -> int:
+    """
+    Generate a heap size that is wholly complete (a full pyramid with no holes) that
+    will fit n-nodes. Given n may be smaller than the returned heap size.
+
+    [1, 3, 7, 15, 31, ..., 2^(j+1)-1] where j is the number of layers in the heap.
+
+    **Parameters**
+    - *n: int*
+    > Size of the given dataset. 
+    - *l: int*
+    > Number of layers to go beyond what would've normally been returned.
+
+    > generateHeapSize(n=14, l=0) --> 15
+
+    > generateHeapSize(n=14, l=1) --> 31
+
+    > generateHeapSize(n=7, l=0) --> 7
+
+    > generateHeapSize(n=7, l=1) --> 15
+    """
+
+    k = 1
+    increment = 1
+
+    while(k < n):
+        increment *= 2
+        k += increment
+
+    while(l > 0):
+        increment *= 2
+        k += increment
+        l -= 1
+
+    return k
+
 class HeapType(Enum):
     MINIMUM = "minimum"
     MAXIMUM = "maximum"
@@ -16,8 +52,6 @@ class Heap:
             # Heap breaks if not strictly enforced.
             # Example Break Case: User passes in heaptype=None.
         self._array = []
-        self._minLeafIndex = 0
-        self._maxLeafIndex = 0
         self.insert(*args)
 
     #-------------[ OBJECT DESCRIPTOR(S) ]-------------#
@@ -105,6 +139,58 @@ class Heap:
     def leaves(self) -> list[int]:
         return [i for i in range(self.lastParent + 1, len(self))]
     
+    def __extremaIndexHelper(self, value, i: int=0) -> int|None:
+        """
+        This greedy algorithm attempts to ensure that only the absolute 
+        minimums/maximums of the data set being inserted are stored 
+        in this heap. There is room for error, but overall, this 
+        does this functionality without looping over all leaf nodes.
+        The only other solution that unfortunately results in O(n/2) 
+        run time. This reduces that down to a spectacular O(log(n)) 
+        as we are essentially doing a sift down to find the extrema 
+        in opposite to the heap type.
+
+        The roughness can be avoided by simply maintaining a larger
+        heap than what is wanted i.e. for maintaining k-smallest
+        elements in a min-heap, maintain a heap that is size k+m
+        where m is some arbitrary number set by the user. Using
+        the generateHeapSize() function defined in this module is
+        recommended for this.
+        """
+
+        if(self.isLeaf(i)):
+            if(
+                (self._heaptype is HeapType.MINIMUM and self[i] < value)
+                or
+                (self._heaptype is HeapType.MAXIMUM and self[i] > value)
+            ):
+                return None
+            return i
+
+        l = self.left(i)
+        r = self.right(i)
+
+        if(r > self.n):
+            return self.__extremaIndexHelper(value, l)
+            # Left is guaranteed to exist as insertions are made left to right and
+            # that we already checked if this node is a parent earlier i.e. it is
+            # not a leaf node. So all we need to do is check if right exists. If
+            # right does not exist, it also implies the left node is a leaf node.
+            # We can just return it immediately then once we've verified value is
+            # lt/gt (in accordance with heaptype) than self[l].
+
+        if(
+            (self._heaptype is HeapType.MINIMUM and self[l] > self[r])
+            or
+            (self._heaptype is HeapType.MAXIMUM and self[l] < self[r])
+        ):
+            return self.__extremaIndexHelper(value, l)
+        else:
+            return self.__extremaIndexHelper(value, r)
+            # We default to bubbling down the right side as it is more likely
+            # that the maximum/minimum leaf is on the left due to insertion 
+            # being left to right.
+    
     #-------------[ CLASS FUNCTION(S) ]-------------#
 
     def __setitem__(self, i: int, value) -> None:
@@ -131,7 +217,7 @@ class Heap:
 
         if(heaptype is not self._heaptype):
             self._heaptype = heaptype
-            for j in range(self.lastParent, 0, -1):
+            for j in range(self.lastParent, -1, -1):
                 self.heapify(j)
             # HeapType was changed, so now the 
             # entire heap must be re-heapified.
@@ -161,33 +247,25 @@ class Heap:
 
         for arg in args:
             
-            i = self.n
+            i = 0
 
-            if(self._heaptype is HeapType.MINIMUM):
-                if(self.full):
-                    i = self._maxLeafIndex
-                    if(self[i] > arg):
-                        self[i] = arg
+            if(self.full):
+                i = self.__extremaIndexHelper(arg, i)
+                if(i is not None):
+                    self[i] = arg
                 else:
-                    self.append(arg)
-                    i = self.n
-
-                while(self[i] < self[self.parent(i)]):
-                    self.swap(i, self.parent(i))
-                    i = self.parent(i)
-
-            elif(self._heaptype is HeapType.MAXIMUM):
-                if(self.full):
-                    i = self._minLeafIndex
-                    if(self[i] < arg):
-                        self[i] = arg
-                else:
-                    self.append(arg)
-                    i = self.n
-
-                while(self[i] > self[self.parent(i)]):
-                    self.swap(i, self.parent(i))
-                    i = self.parent(i)
+                    continue
+            else:
+                self.append(arg)
+                i = self.n
+            
+            while(
+                (self._heaptype is HeapType.MINIMUM and self[i] < self[self.parent(i)])
+                or
+                (self._heaptype is HeapType.MAXIMUM and self[i] > self[self.parent(i)])
+            ):
+                self.swap(i, self.parent(i))
+                i = self.parent(i)
 
     def pop(self):
         popped = self[0]
