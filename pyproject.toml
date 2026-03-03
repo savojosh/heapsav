@@ -1,0 +1,19 @@
+[project]
+name = "heapsav_savojosh"
+version = "0.0.1"
+authors = [
+  { name="savojosh", email="jmps2022@gmail.com" },
+]
+description = "Heap class that can be maintained as a min- or max- heap."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+
+[project.urls]
+Homepage = "https://github.com/savojosh/heapsav"
+Issues = "https://github.com/savojosh/heapsav/issues"

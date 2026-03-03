@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: heapsav_savojosh
+Version: 0.0.1
+Summary: Heap class that can be maintained as a min- or max- heap.
+Author-email: savojosh <jmps2022@gmail.com>
+License-Expression: GPL-3.0-only
+Project-URL: Homepage, https://github.com/savojosh/heapsav
+Project-URL: Issues, https://github.com/savojosh/heapsav/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# heapsav
